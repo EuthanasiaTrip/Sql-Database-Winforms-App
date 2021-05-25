@@ -42,18 +42,6 @@ namespace WindowsFormsApp1
             " inner join costumers on applications.`Покупатель` = costumers.id "+
             "group by costumers.Организация",
             //12
-            /*"select costumers.Организация, max(applications.`Требуемое количество` * products.Цена) as `Стоимость` " +
-            "from applications inner join products on applications.`Товар` = products.id" +
-            " inner join costumers on applications.`Покупатель` = costumers.id " +
-            "where sum(applications.`Требуемое количество` * products.Цена) = (select max(applications.`Требуемое количество` * products.Цена)" +
-            " from applications inner join products on applications.`Товар` = products.id) " +
-            "group by costumers.Организация",*/
-
-            /*"select s.Организация, s.Sum from (select costumers.Организация as Организация, sum(applications.`Требуемое количество` * products.Цена) as Sum " +
-            "from applications inner join products on applications.`Товар` = products.id" +
-            " inner join costumers on applications.`Покупатель` = costumers.id "+
-            "group by costumers.Организация) s where s.Sum = (select max(applications.`Требуемое количество` * products.Цена) as MaxSum " +
-            "from applications inner join products on applications.`Товар` = products.id)",*/
 
             "select costumers.Организация, sum(applications.`Требуемое количество` * products.Цена) as `Сумма` " +
             "from applications inner join products on applications.`Товар` = products.id" +

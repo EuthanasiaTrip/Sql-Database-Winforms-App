@@ -50,7 +50,9 @@
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.deleteRowButton = new System.Windows.Forms.ToolStripMenuItem();
             this.EditButton = new System.Windows.Forms.ToolStripMenuItem();
+            this.showOrdersMenuButton = new System.Windows.Forms.ToolStripMenuItem();
             this.button4 = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
@@ -232,23 +234,32 @@
             this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.deleteRowButton,
-            this.EditButton});
+            this.EditButton,
+            this.showOrdersMenuButton});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(148, 52);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(223, 76);
+            this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             // 
             // deleteRowButton
             // 
             this.deleteRowButton.Name = "deleteRowButton";
-            this.deleteRowButton.Size = new System.Drawing.Size(147, 24);
+            this.deleteRowButton.Size = new System.Drawing.Size(222, 24);
             this.deleteRowButton.Text = "Удалить";
             this.deleteRowButton.Click += new System.EventHandler(this.deleteRowButton_Click);
             // 
             // EditButton
             // 
             this.EditButton.Name = "EditButton";
-            this.EditButton.Size = new System.Drawing.Size(147, 24);
+            this.EditButton.Size = new System.Drawing.Size(222, 24);
             this.EditButton.Text = "Изменить";
             this.EditButton.Click += new System.EventHandler(this.EditButton_Click);
+            // 
+            // showOrdersMenuButton
+            // 
+            this.showOrdersMenuButton.Name = "showOrdersMenuButton";
+            this.showOrdersMenuButton.Size = new System.Drawing.Size(222, 24);
+            this.showOrdersMenuButton.Text = "Просмотреть заявки";
+            this.showOrdersMenuButton.Click += new System.EventHandler(this.showOrdersMenuButton_Click);
             // 
             // button4
             // 
@@ -260,12 +271,23 @@
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(683, 469);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(46, 17);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "label1";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.BottomRight;
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLight;
             this.ClientSize = new System.Drawing.Size(950, 513);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.labelTable);
             this.Controls.Add(this.button3);
@@ -312,6 +334,8 @@
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.ToolStripMenuItem EditButton;
         private System.Windows.Forms.ToolStripMenuItem queriesToolStripMenu;
+        private System.Windows.Forms.ToolStripMenuItem showOrdersMenuButton;
+        private System.Windows.Forms.Label label1;
     }
 }
 

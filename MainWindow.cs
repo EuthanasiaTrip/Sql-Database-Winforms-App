@@ -29,9 +29,9 @@ namespace WindowsFormsApp1
             public string View;
             public string Name;
         }
-        private static MySqlConnection connection;
-        private static MySqlCommand command;
-        private static MySqlDataReader reader;
+        public static MySqlConnection connection { get; set; }
+        public static MySqlCommand command { get; set; }
+        public static MySqlDataReader reader { get; set; }
         private List<string[]> rows = new List<string[]>();
         private List<int> ids = new List<int>();
         public List<string> column_names = new List<string>();
@@ -109,18 +109,20 @@ namespace WindowsFormsApp1
 
             }
             queriesToolStripMenu.DropDownItems.AddRange(premadeQueries);
+            showOrdersMenuButton.Visible = false;
+            label1.Visible = false;
+            label1.Text = "Итоговая сумма заявок: ";
         }
 
 
         // Connection to DB
-        private static void Connect()
+        public static void Connect()
         {
             string cmd = "server=localhost;user=root;password=Flamingoe228;database=store;";
             try
             {
                 connection = new MySqlConnection(cmd);
                 connection.Open();
-                //MessageBox.Show("Connection open", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch(InvalidOperationException e)
             {
@@ -252,7 +254,14 @@ namespace WindowsFormsApp1
                 {
                     MessageBox.Show("Пожалуйста, выберите и отобразите таблицу", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-
+            if(currentTable.Name == "applications")
+            {
+                var sum = get_single_column(
+                    "applications inner join products on applications.`Товар` = products.id ",
+                " sum(`Требуемое количество`*products.Цена) ");
+                label1.Text += sum[0];
+                label1.Visible = true;
+            }
         }
 
         //clear grid
@@ -380,5 +389,24 @@ namespace WindowsFormsApp1
             }
         }
 
+        private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+        {
+            if (currentTable.Name == "applications")
+            {
+                showOrdersMenuButton.Visible = true;
+            }
+            else
+            {
+                showOrdersMenuButton.Visible = false;
+            }
+        }
+
+        private void showOrdersMenuButton_Click(object sender, EventArgs e)
+        {
+            List<string> id = get_single_column("applications", "Покупатель");
+            var name = dataGridView1.CurrentRow.Cells[2].Value.ToString();
+            CostumersOrdersWindoow costumersOrders =  new CostumersOrdersWindoow(this, name);
+            costumersOrders.Show();
+        }
     }
 }
