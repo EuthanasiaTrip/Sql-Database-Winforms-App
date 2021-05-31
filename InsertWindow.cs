@@ -1,40 +1,74 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WindowsFormsApp1
 {
+    /// <summary>
+    /// Класс окна ввода информации в БД
+    /// </summary>
     public partial class InsertWindow : Form
     {
-        private Point pos = new Point(35, 46);
-        private MainWindow mnWd;
-        private List<Label> lables = new List<Label>();
-        private List<TextBox> textBoxes = new List<TextBox>();
-        private string q;
-        private InsertWindowType itype;
+        /// <summary>
+        /// Текущая позиция нового добавляемого элемента в форму
+        /// </summary>
+        private Point _pos = new Point(35, 46);
 
+        /// <summary>
+        /// Ссылка на родительское окно
+        /// </summary>
+        private MainWindow _mnWd;
+
+        /// <summary>
+        /// Список подписей для названия столбцов
+        /// </summary>
+        private List<Label> _lables = new List<Label>();
+
+        /// <summary>
+        /// Список для элементов <see cref="TextBox"/>
+        /// </summary>
+        private List<TextBox> _textBoxes = new List<TextBox>();
+
+        /// <summary>
+        /// Параметр окна (изменение или добавление)
+        /// <para>
+        /// <see cref="InsertWindowType"/>
+        /// </para>
+        /// </summary>
+        private readonly InsertWindowType _itype;
+
+        /// <summary>
+        /// Текущая таблица
+        /// <para>
+        /// <see cref="table"/>
+        /// </para>
+        /// </summary>
+        private table _curT;
+
+        /// <summary>
+        /// Конструктор окна
+        /// </summary>
+        /// <param name="main">Ссылка на родительское окно</param>
+        /// <param name="t">Параметр ввода</param>
         public InsertWindow(MainWindow main, InsertWindowType t)
         {
             InitializeComponent();
-            mnWd = main;
-            tableName.Text = mnWd.currentTable.Name;
-            for (int i = 0; i < mnWd.column_names.Count; i++)
+            _mnWd = main;
+            _curT = _mnWd.currentTable;
+            tableName.Text = _curT.Name;
+            for (int i = 0; i < _mnWd.column_names.Count; i++)
             {
                 try
                 {
-                    if (mnWd.currentTable.Name != "applications")
+                    if (_curT.Name != "applications")
                     {
-                        draw_controls(i);
+                        drawControls(i);
                     }
                     else
                     {
-                        draw_orders_controls(i);
+                        drawOrdersControls(i);
                     }
                 }
                 catch (IndexOutOfRangeException)
@@ -42,118 +76,139 @@ namespace WindowsFormsApp1
                     MessageBox.Show("Please select the table", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            itype = t;
+            _itype = t;
 
-            // moving OK button
-            pos.Offset(0, 5);
-            pos.X = 234;
-            button1.Location = pos;
+            //передвигаем кнопку ОК
+            _pos.Offset(0, 5);
+            _pos.X = 234;
+            button1.Location = _pos;
         }
 
-        private void draw_controls(int i)
+
+        /// <summary>
+        /// Создание окна для ввода информации
+        /// </summary>
+        /// <param name="i">Порядковый номер столбца</param>
+        private void drawControls(int i)
         {
-            // add column name lable
-            lables.Add(new Label() { Location = pos, Text = mnWd.column_names[i], AutoSize = true });
-            this.Controls.Add(lables[i]);
-            lables[i].Show();
-            pos.Offset(0, 29);
+            //отображаем название атрибута
+            _lables.Add(new Label() { Location = _pos, Text = _mnWd.column_names[i], AutoSize = true });
+            this.Controls.Add(_lables[i]);
+            _lables[i].Show();
+            _pos.Offset(0, 29);
 
-            // add textbox for queries;
-            textBoxes.Add(new TextBox() { Location = pos, Width = 512 });      
-            this.Controls.Add(textBoxes[i]);
-            textBoxes[i].Show();
-            pos.Offset(0, 48);
+            //отображаем поле ввода
+            _textBoxes.Add(new TextBox() { Location = _pos, Width = 512 });
+            this.Controls.Add(_textBoxes[i]);
+            _textBoxes[i].Show();
+            _pos.Offset(0, 48);
 
         }
 
-        //draw controls for table with foreign keys
-        private void draw_orders_controls(int i)
+        
+        /// <summary>
+        /// Создание окна для ввода информации с параметрическими запросами
+        /// </summary>
+        /// <param name="i">порядковый номер столбца</param>
+        private void drawOrdersControls(int i)
         {
             ComboBox companiesBox = new ComboBox();
             ComboBox itemsBox = new ComboBox();
 
-            lables.Add(new Label() { Location = pos, Text = mnWd.column_names[i], AutoSize = true });
-            this.Controls.Add(lables[i]);
-            lables[i].Show();
-            pos.Offset(0, 29);
+            _lables.Add(new Label() { Location = _pos, Text = _mnWd.column_names[i], AutoSize = true });
+            this.Controls.Add(_lables[i]);
+            _lables[i].Show();
+            _pos.Offset(0, 29);
 
-            if (mnWd.column_names[i] == "Название")
+            if (_mnWd.column_names[i] == "Название")
             {
-                var itemsList = MainWindow.get_single_column(mnWd.currentTable.View, "`Название`");
+                var itemsList = MainWindow.getSingleColumn(_curT.View, "`Название`");
 
-                itemsBox.Location = pos;
+                itemsBox.Location = _pos;
                 itemsBox.Width = 256;
                 itemsBox.Items.AddRange(itemsList.ToArray());
                 this.Controls.Add(itemsBox);
                 itemsBox.Show();
-                pos.Offset(0, 48);
-            } 
-            else if (mnWd.column_names[i] == "Организация")
+                _pos.Offset(0, 48);
+            }
+            else if (_mnWd.column_names[i] == "Организация")
             {
-                var companiesList = MainWindow.get_single_column(mnWd.currentTable.View, "`Организация`");
+                var companiesList = MainWindow.getSingleColumn(_curT.View, "`Организация`");
 
-                companiesBox.Location = pos;
+                companiesBox.Location = _pos;
                 companiesBox.Width = 256;
                 companiesBox.Items.AddRange(companiesList.ToArray());
                 this.Controls.Add(companiesBox);
                 companiesBox.Show();
-                pos.Offset(0, 48);
+                _pos.Offset(0, 48);
             }
             else
             {
-                textBoxes.Add(new TextBox() { Location = pos, Width = 512 });
-                this.Controls.Add(textBoxes[textBoxes.Count - 1]);
-                textBoxes[textBoxes.Count - 1].Show();
-                pos.Offset(0, 48);
+                _textBoxes.Add(new TextBox() { Location = _pos, Width = 512 });
+                this.Controls.Add(_textBoxes[_textBoxes.Count - 1]);
+                _textBoxes[_textBoxes.Count - 1].Show();
+                _pos.Offset(0, 48);
             }
         }
 
-        private string assemble_insert_query()
+        /// <summary>
+        /// <c>assembleInsertQuery</c> формирует запрос на добавление данных на языке SQL для отправки в БД
+        /// </summary>
+        /// <returns>Возвращает сформированный запрос в виде строки</returns>
+        private string assembleInsertQuery()
         {
             List<string> values = new List<string>();
-            for (int i=0; i < textBoxes.Count; i++)
+            for (int i = 0; i < _textBoxes.Count; i++)
             {
-                if (string.IsNullOrEmpty(textBoxes[i].Text))
+                if (string.IsNullOrEmpty(_textBoxes[i].Text))
                 {
                     values.Add("null");
                 }
                 else
                 {
-                    values.Add("'" + textBoxes[i].Text + "'");
+                    values.Add("'" + _textBoxes[i].Text + "'");
                 }
             }
-            string query = "INSERT INTO " + mnWd.currentTable.Name + "(`" + string.Join("`, `", mnWd.column_names) + "`) VALUES (" + string.Join(", ", values) + ");";
-            return query;
-        }
-       
-        private string assemble_edit_query()
-        {
-            List<string> values = new List<string>();
-            List<string> columnsToInput = new List<string>();
-            for (int i = 0; i < textBoxes.Count; i++)
-            {
-                values.Add("'" + textBoxes[i].Text + "'");
-                if (textBoxes[i].TextLength > 0)
-                {
-                    columnsToInput.Add($"`{mnWd.column_names[i]}` = {values[i]}");
-                }
-            }
-            string query = $"UPDATE {mnWd.currentTable.Name} SET " + string.Join(", ", columnsToInput) + $" WHERE id = {mnWd.getRowId()};";
+            string query = "INSERT INTO " + _curT.Name + "(`" + string.Join("`, `", _mnWd.column_names) + "`) VALUES (" + string.Join(", ", values) + ");";
             return query;
         }
 
+        /// <summary>
+        /// <c>assembleEditQuery</c> формирует запрос на изменение данных на языке SQL для отправки в БД
+        /// </summary>
+        /// <returns>Возвращает сформированный запрос в виде строки</returns>
+        private string assembleEditQuery()
+        {
+            List<string> values = new List<string>();
+            List<string> columnsToInput = new List<string>();
+            for (int i = 0; i < _textBoxes.Count; i++)
+            {
+                values.Add("'" + _textBoxes[i].Text + "'");
+                if (_textBoxes[i].TextLength > 0)
+                {
+                    columnsToInput.Add($"`{_mnWd.column_names[i]}` = {values[i]}");
+                }
+            }
+            string query = $"UPDATE {_curT.Name} SET " + string.Join(", ", columnsToInput) + $" WHERE id = {_mnWd.getRowId()};";
+            return query;
+        }
+
+        /// <summary>
+        /// Обработка события нажатия на кнопку
+        /// </summary>
+        /// <param name="sender">отправитель</param>
+        /// <param name="e">событие</param>
         private void button1_Click(object sender, EventArgs e)
         {
-            if (itype == InsertWindowType.Delete)
+            if (_itype == InsertWindowType.Delete)
             {
-                mnWd.execute_cmd(assemble_insert_query());
+                _mnWd.executeCmd(assembleInsertQuery());
             }
-            else if (itype == InsertWindowType.Edit)
+            else if (_itype == InsertWindowType.Edit)
             {
-                mnWd.execute_cmd(assemble_edit_query());
+                _mnWd.executeCmd(assembleEditQuery());
             }
-            mnWd.drawTable("SELECT * FROM " + mnWd.currentTable.View+";");
-            System.Diagnostics.Debug.WriteLine(q);
+            _mnWd.drawTable("SELECT * FROM " + _curT.View + ";");
             this.Close();
         }
 
