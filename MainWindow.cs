@@ -201,6 +201,10 @@ namespace WindowsFormsApp1
                     {
                         rows[rows.Count - 1][i] = reader[i].ToString();
                         dataGridView1.Columns[i].HeaderText = reader.GetName(i);
+                        if (rows[rows.Count - 1][i].Contains("0:00:00"))
+                        {
+                            rows[rows.Count - 1][i] = rows[rows.Count - 1][i].Replace(" 0:00:00", "");
+                        }
                     }
                 }
 
