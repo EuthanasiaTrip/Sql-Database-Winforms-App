@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using MySql.Data.MySqlClient;
 
@@ -24,11 +19,6 @@ namespace WindowsFormsApp1
     }
     public partial class MainWindow : Form
     {
-        public struct table
-        {
-            public string View;
-            public string Name;
-        }
         public static MySqlConnection connection { get; set; }
         public static MySqlCommand command { get; set; }
         public static MySqlDataReader reader { get; set; }
@@ -54,7 +44,7 @@ namespace WindowsFormsApp1
                 else if(i == 6)
                 {
                     List<ToolStripMenuItemWithSQL> namesButtons = new List<ToolStripMenuItemWithSQL>();
-                    var names = get_single_column("products", "Название");
+                    var names = getSingleColumn("products", "Название");
                     for(int j = 0; j < names.Count; j++)
                     {
                         namesButtons.Add(new ToolStripMenuItemWithSQL
@@ -70,7 +60,7 @@ namespace WindowsFormsApp1
                 else if (i == 7)
                 {
                     List<ToolStripMenuItemWithSQL> clientsButtons = new List<ToolStripMenuItemWithSQL>();
-                    var names = get_single_column("costumers", "Организация");
+                    var names = getSingleColumn("costumers", "Организация");
                     for (int j = 0; j < names.Count; j++)
                     {
                         clientsButtons.Add(new ToolStripMenuItemWithSQL
@@ -88,7 +78,7 @@ namespace WindowsFormsApp1
                 else if (i == 11)
                 {
                     List<ToolStripMenuItemWithSQL> productsButtons = new List<ToolStripMenuItemWithSQL>();
-                    var names = get_single_column("products", "Название");
+                    var names = getSingleColumn("products", "Название");
                     for (int j = 0; j < names.Count; j++)
                     {
                         productsButtons.Add(new ToolStripMenuItemWithSQL
@@ -134,7 +124,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        public static List<string> get_single_column(string tname, string cname)
+        public static List<string> getSingleColumn(string tname, string cname)
         {
             List<string> column = new List<string>();
             Connect();
@@ -227,7 +217,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        public void execute_cmd(string cmd)
+        public void executeCmd(string cmd)
         {
             Connect();
             command = new MySqlCommand(cmd + ";", connection);
@@ -256,7 +246,7 @@ namespace WindowsFormsApp1
                 }
             if(currentTable.Name == "applications")
             {
-                var sum = get_single_column(
+                var sum = getSingleColumn(
                     "applications inner join products on applications.`Товар` = products.id ",
                 " sum(`Требуемое количество`*products.Цена) ");
                 label1.Text += sum[0];
@@ -353,7 +343,7 @@ namespace WindowsFormsApp1
                 var confirm = MessageBox.Show("Вы действительно хотите удалить эту строку?", "Удаление строки", MessageBoxButtons.YesNo);
                 if (confirm == DialogResult.Yes)
                 {
-                    execute_cmd("DELETE FROM " + currentTable.Name + " WHERE id=" + ids[dataGridView1.CurrentRow.Index] + ";");
+                    executeCmd("DELETE FROM " + currentTable.Name + " WHERE id=" + ids[dataGridView1.CurrentRow.Index] + ";");
                     drawTable($"SELECT * FROM {currentTable.View}");
                 }
             }
@@ -403,7 +393,7 @@ namespace WindowsFormsApp1
 
         private void showOrdersMenuButton_Click(object sender, EventArgs e)
         {
-            List<string> id = get_single_column("applications", "Покупатель");
+            List<string> id = getSingleColumn("applications", "Покупатель");
             var name = dataGridView1.CurrentRow.Cells[2].Value.ToString();
             CostumersOrdersWindoow costumersOrders =  new CostumersOrdersWindoow(this, name);
             costumersOrders.Show();
