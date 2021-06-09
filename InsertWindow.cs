@@ -47,6 +47,11 @@ namespace WindowsFormsApp1
         /// </summary>
         private table _curT;
 
+        private TextBox _prods;
+        private TextBox _costs;
+        private int _textboxAmountId;
+        private int _prId;
+
         /// <summary>
         /// Конструктор окна
         /// </summary>
@@ -84,6 +89,10 @@ namespace WindowsFormsApp1
             button1.Location = _pos;
         }
 
+        private void selectDropDownItem(object sender, EventArgs e)
+        {
+
+        }
 
         /// <summary>
         /// Создание окна для ввода информации
@@ -120,35 +129,66 @@ namespace WindowsFormsApp1
             _lables[i].Show();
             _pos.Offset(0, 29);
 
-            if (_mnWd.column_names[i] == "Название")
+            if(_mnWd.column_names[i] == "Требуемое количество")
             {
-                var itemsList = MainWindow.getSingleColumn(_curT.View, "`Название`");
+                _textboxAmountId = i;
+            }
+
+            if (_mnWd.column_names[i] == "Товар")
+            {
+                var itemsList = MainWindow.getSingleColumn("products", "`Название`");
+
+                _textBoxes.Add(new TextBox() { Visible = false });
+                this.Controls.Add(_textBoxes[i]);
+                _prods = _textBoxes[i];
 
                 itemsBox.Location = _pos;
                 itemsBox.Width = 256;
                 itemsBox.Items.AddRange(itemsList.ToArray());
+                itemsBox.SelectionChangeCommitted += new System.EventHandler(setProductsBox);
                 this.Controls.Add(itemsBox);
                 itemsBox.Show();
                 _pos.Offset(0, 48);
             }
-            else if (_mnWd.column_names[i] == "Организация")
-            {
-                var companiesList = MainWindow.getSingleColumn(_curT.View, "`Организация`");
+            else if (_mnWd.column_names[i] == "Покупатель")
+            {                
+                var companiesList = MainWindow.getSingleColumn("costumers", "`Организация`");
+
+                _textBoxes.Add(new TextBox() { Visible = false });
+                this.Controls.Add(_textBoxes[i]);
+                _costs = _textBoxes[i];
 
                 companiesBox.Location = _pos;
                 companiesBox.Width = 256;
                 companiesBox.Items.AddRange(companiesList.ToArray());
+                companiesBox.SelectionChangeCommitted += new System.EventHandler(setCostumersBox);
                 this.Controls.Add(companiesBox);
                 companiesBox.Show();
                 _pos.Offset(0, 48);
+
             }
             else
             {
                 _textBoxes.Add(new TextBox() { Location = _pos, Width = 512 });
-                this.Controls.Add(_textBoxes[_textBoxes.Count - 1]);
+                this.Controls.Add(_textBoxes[i]);
                 _textBoxes[_textBoxes.Count - 1].Show();
                 _pos.Offset(0, 48);
             }
+        }
+
+        private void setProductsBox(object sender, EventArgs e)
+        {
+            var cbox = (ComboBox)sender;
+            var ids = MainWindow.getSingleColumn("products", "id");
+            _prId = int.Parse(ids[cbox.SelectedIndex]);
+            _prods.Text = ids[cbox.SelectedIndex];
+        }
+
+        private void setCostumersBox(object sender, EventArgs e)
+        {
+            var cbox = (ComboBox)sender;
+            var ids = MainWindow.getSingleColumn("costumers", "id");
+            _costs.Text = ids[cbox.SelectedIndex];
         }
 
         /// <summary>
@@ -158,6 +198,7 @@ namespace WindowsFormsApp1
         private string assembleInsertQuery()
         {
             List<string> values = new List<string>();
+            List<string> amounts = MainWindow.getSingleColumn("applications", "`Требуемое количество`");
             for (int i = 0; i < _textBoxes.Count; i++)
             {
                 if (string.IsNullOrEmpty(_textBoxes[i].Text))
@@ -166,6 +207,10 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
+                    /*if (_curT.Name == "applications" && i == _textBoxes.Count)
+                    {
+
+                    }*/
                     values.Add("'" + _textBoxes[i].Text + "'");
                 }
             }
@@ -193,6 +238,22 @@ namespace WindowsFormsApp1
             return query;
         }
 
+        private void updateAmount(int productID, int amount)
+        {
+            var amStr = MainWindow.getSingleColumn($"products  where id = {productID}", "`product_amount`");
+            int amountOnStorage = int.Parse(amStr[0]);
+            if(amountOnStorage >= amount)
+            {
+                amountOnStorage -= amount;
+                _mnWd.executeCmd($"update products set `product_amount` = {amountOnStorage} where id = {productID}");
+            }
+            else
+            {
+                throw new ApplicationException("Amount on storage is less than requested amount");
+            }
+
+        }
+
         /// <summary>
         /// Обработка события нажатия на кнопку
         /// </summary>
@@ -202,7 +263,22 @@ namespace WindowsFormsApp1
         {
             if (_itype == InsertWindowType.Delete)
             {
-                _mnWd.executeCmd(assembleInsertQuery());
+                if (_curT.Name != "applications")
+                {
+                    _mnWd.executeCmd(assembleInsertQuery());
+                }
+                else
+                {
+                    try
+                    {
+                        updateAmount(_prId, int.Parse(_textBoxes[_textboxAmountId].Text));
+                        _mnWd.executeCmd(assembleInsertQuery());
+                    }
+                    catch (ApplicationException)
+                    {
+                        MessageBox.Show("Количество товара на складе меньше запрашиваемого значения", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
             else if (_itype == InsertWindowType.Edit)
             {

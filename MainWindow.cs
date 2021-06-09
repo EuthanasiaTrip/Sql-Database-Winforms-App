@@ -101,7 +101,6 @@ namespace WindowsFormsApp1
             queriesToolStripMenu.DropDownItems.AddRange(premadeQueries);
             showOrdersMenuButton.Visible = false;
             label1.Visible = false;
-            label1.Text = "Итоговая сумма заявок: ";
         }
 
 
@@ -240,6 +239,7 @@ namespace WindowsFormsApp1
         //draw table button
         private void button1_Click(object sender, EventArgs e)
         {
+            label1.Text = string.Empty;
             if (!string.IsNullOrEmpty(currentTable.View) && !isPrmdQuerySelected)
                 {
                     drawTable("SELECT * FROM " + currentTable.View + ";");
@@ -253,7 +253,7 @@ namespace WindowsFormsApp1
                 var sum = getSingleColumn(
                     "applications inner join products on applications.`Товар` = products.id ",
                 " sum(`Требуемое количество`*products.Цена) ");
-                label1.Text += sum[0];
+                label1.Text = $"Итоговая сумма заявок: {sum[0]}";
                 label1.Visible = true;
             }
         }
